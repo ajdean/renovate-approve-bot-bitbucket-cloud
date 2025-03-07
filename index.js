@@ -1,7 +1,7 @@
 const bunyan = require('bunyan');
 const got = require('got');
 
-const { BITBUCKET_USERNAME, BITBUCKET_PASSWORD, RENOVATE_BOT_USER } =
+const { BITBUCKET_USERNAME, BITBUCKET_PASSWORD, RENOVATE_BOT_USER, BITBUCKET_WORKSPACE } =
   process.env;
 const MANUAL_MERGE_MESSAGE = 'merge this manually';
 const AUTO_MERGE_MESSAGE = '**Automerge**: Enabled.';
@@ -39,7 +39,7 @@ function isAutomerging(pr) {
 }
 
 function getPullRequests() {
-  const prEndpoint = `/2.0/pullrequests/${RENOVATE_BOT_USER}`;
+  const prEndpoint = `/2.0/workspaces/${BITBUCKET_WORKSPACE}/pullrequests/${RENOVATE_BOT_USER}`;
   log.info('Requesting %s%s...', DEFAULT_OPTIONS.prefixUrl, prEndpoint);
 
   return got.paginate('', {
