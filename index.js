@@ -102,7 +102,7 @@ async function main() {
     process.exit(1);
   }
 
-  log.info('Approving PRs in: %s', REPOSITORIES.join(", "));
+  log.info('Approving PRs in: %s', REPOSITORIES ? REPOSITORIES.join(", ") : "NULL");
 
   let prHrefs;
   try {
