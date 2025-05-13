@@ -10,7 +10,7 @@ const {
 } = process.env;
 const MANUAL_MERGE_MESSAGE = 'merge this manually';
 const AUTO_MERGE_MESSAGE = '**Automerge**: Enabled.';
-const REPOSITORIES = (BITBUCKET_REPOSITORIES || "").split(/\r?\n/);
+const REPOSITORIES = BITBUCKET_REPOSITORIES ? BITBUCKET_REPOSITORIES.split(/\r?\n/) : undefined;
 
 const DEFAULT_OPTIONS = {
   prefixUrl: 'https://api.bitbucket.org',
@@ -46,7 +46,7 @@ function isAutomerging(pr) {
 
 function isInRepositories(pr) {
   try {
-    return REPOSITORIES.some(r => pr.links.self.href.includes(r));
+    return REPOSITORIES ? REPOSITORIES.some(r => pr.links.self.href.includes(r)) : false;
   } catch (error) {
     log.error(error);
     return false;
@@ -101,6 +101,8 @@ async function main() {
     );
     process.exit(1);
   }
+
+  log.info('Approving PRs in: %s', REPOSITORIES.join(", "));
 
   let prHrefs;
   try {
