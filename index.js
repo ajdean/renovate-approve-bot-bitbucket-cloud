@@ -6,9 +6,11 @@ const {
   BITBUCKET_PASSWORD,
   BITBUCKET_WORKSPACE,
   RENOVATE_BOT_USER,
+  BITBUCKET_REPOSITORIES
 } = process.env;
 const MANUAL_MERGE_MESSAGE = 'merge this manually';
 const AUTO_MERGE_MESSAGE = '**Automerge**: Enabled.';
+const REPOSITORIES = (BITBUCKET_REPOSITORIES || "").split(/\r?\n/);
 
 const DEFAULT_OPTIONS = {
   prefixUrl: 'https://api.bitbucket.org',
@@ -42,6 +44,15 @@ function isAutomerging(pr) {
   }
 }
 
+function isInRepositories(pr) {
+  try {
+    return REPOSITORIES.some(r => pr.links.self.href.includes(r));
+  } catch (error) {
+    log.error(error);
+    return false;
+  }
+}
+
 function getPullRequests() {
   const prEndpoint = `/2.0/workspaces/${BITBUCKET_WORKSPACE}/pullrequests/${RENOVATE_BOT_USER}`;
   log.info('Requesting %s%s...', DEFAULT_OPTIONS.prefixUrl, prEndpoint);
@@ -53,6 +64,7 @@ function getPullRequests() {
       transform: (response) =>
         response.body.values
           .filter((pr) => isAutomerging(pr))
+          .filter((pr) => isInRepositories(pr))
           .map((pr) => pr.links.self.href),
       paginate: (response) => {
         if ('next' in response.body && response.body.next !== '') {
